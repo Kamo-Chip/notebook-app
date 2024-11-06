@@ -39,7 +39,7 @@ export const getContext = async (
     const matches = await getMatchesFromEmbeddings(
       queryEmbeddings,
       namespaceToAccess,
-      3,
+      20,
       notebook
     );
 
@@ -50,9 +50,9 @@ export const getContext = async (
     );
 
     let docs = qualifyingDocs.map((match) => match?.metadata?.text);
-    return docs.join("\n").substring(0, 3000);
+    return docs.join("\n").substring(0, 50000);
   } catch (e: any) {
     console.log("Error getting context: ", e.message);
-    return [];
+    return "";
   }
 };

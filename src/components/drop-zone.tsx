@@ -3,23 +3,29 @@
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import TooltipWrapper from "./wrappers/tooltip-wrapper";
-
+import { processSources } from "@/lib/actions";
+import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
+import { EMPTY_FORM_STATE } from "@/lib/form-utils";
 const MAX_SOURCES = 3;
 export const DropZone = () => {
   const [sources, setSources] = useState<File[]>([]);
+  const router = useRouter();
+  const [state, action, pending] = useActionState(
+    processSources.bind(null, sources),
+    EMPTY_FORM_STATE
+  );
 
+  useEffect(() => {
+    if (state.status === "SUCCESS" && state.data?.playlistId!) {
+      router.push(`/playlists?playlistId=${state.data.playlistId}`);
+    }
+  }, [state]);
   return (
-    <form
-      className="flex flex-col gap-6"
-      action={async (formData: FormData) => {
-        const fields = Object.fromEntries(formData.entries());
-        console.log(fields);
-        console.log("hello");
-      }}
-    >
+    <form className="flex flex-col gap-6" action={action}>
       {sources.length > 0 ? (
         <div className="flex flex-wrap gap-4">
           {sources.map((file) => (
@@ -107,8 +113,8 @@ export const DropZone = () => {
         }}
       />
       {sources.length > 0 && (
-        <Button className="mx-auto" type="submit">
-          Create Playlist
+        <Button className="mx-auto" type="submit" disabled={pending}>
+          {pending ? "Loading..." : "Create Playlist"}
         </Button>
       )}
     </form>

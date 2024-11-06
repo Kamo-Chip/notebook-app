@@ -1,24 +1,25 @@
-import fs from "fs";
-
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-export const uploadToS3 = async (filePath: string, key: string) => {
+export const uploadToS3 = async (
+  file: File | Buffer<ArrayBufferLike>,
+  key: string,
+  bucket: string
+) => {
   try {
     const s3Response = await fetch(`${BASE_URL}/api/s3`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: key }),
+      body: JSON.stringify({ key: key, bucket: bucket }),
     });
 
     const s3Data = await s3Response.json();
 
-    const podcastFile = fs.readFileSync(filePath);
     await fetch(s3Data.url, {
       method: "PUT",
       headers: {
         "Content-Type": "audio/mpeg",
       },
-      body: podcastFile,
+      body: file,
     });
   } catch (error) {
     console.error("Failed to upload to s3: ", error);
@@ -26,11 +27,14 @@ export const uploadToS3 = async (filePath: string, key: string) => {
   }
 };
 
-export const fetchFromS3 = async (key: string) => {
+export const fetchFromS3 = async (key: string, bucket: string) => {
   try {
-    const response = await fetch(`${BASE_URL}/api/s3?key=${key}`, {
-      method: "GET",
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/s3?key=${key}&bucket=${bucket}`,
+      {
+        method: "GET",
+      }
+    );
 
     const data = await response.json();
 

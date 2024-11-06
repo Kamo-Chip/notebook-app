@@ -1,15 +1,89 @@
 "use server";
 
+import fs from "fs";
 import path from "path";
 import { combineAudioFiles, generateAudioFromDialogue } from "./audio";
 import { loadDocumentIntoPinecone } from "./pinecone";
 import { fetchFromS3, uploadToS3 } from "./s3";
-import { SYSTEM_PROMPT } from "./utils";
+import { PODCASTS_BUCKET, SOURCES_BUCKET, SYSTEM_PROMPT } from "./utils";
 import { v4 as uuidv4 } from "uuid";
 import { Dialogue } from "./types";
+import { FormState, fromErrorToFormState, toFormState } from "./form-utils";
+import { createPlaylist, createPodcastEpisode, createSource } from "./data";
+import { getContext } from "./context";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-const DEMO_S3_FILE = "90b808ab-059d-457b-9fa6-cfc65457e47a.mp3"; // Set to empty when not testing
+const DEMO_S3_FILE = ""; // Set to empty when not testing 90b808ab-059d-457b-9fa6-cfc65457e47a.mp3
+
+export const createPodcast = async (
+  playlistId: string,
+  formState: FormState,
+  formData: FormData
+) => {
+  const audioFiles: string[] = [];
+  const fileNameAndExtension = `${uuidv4()}.mp3`;
+  const finalPodcastPath = path.join(process.cwd(), fileNameAndExtension);
+  const fields = Object.fromEntries(formData.entries());
+  const instructions = fields.instructions as string;
+  const title = fields.title as string;
+  try {
+    // TODO : Add zod validation
+
+    const context = await getContext(
+      instructions as string,
+      "notebooks",
+      playlistId
+    );
+
+    const script = await generateScript(context, instructions);
+
+    await generateAudioFromDialogue(script, audioFiles);
+
+    await combineAudioFiles(audioFiles, finalPodcastPath);
+
+    const podcastFile = fs.readFileSync(finalPodcastPath);
+
+    await uploadToS3(podcastFile, fileNameAndExtension, PODCASTS_BUCKET);
+
+    await createPodcastEpisode(title, playlistId, fileNameAndExtension, 3);
+
+    const audioUrl = await fetchFromS3(
+      DEMO_S3_FILE || fileNameAndExtension,
+      PODCASTS_BUCKET
+    );
+
+    fs.unlinkSync(finalPodcastPath);
+
+    return toFormState("SUCCESS", "Successfully create podcast", {
+      url: audioUrl,
+    });
+  } catch (error) {
+    return fromErrorToFormState(error);
+  }
+};
+
+export const processSources = async (sources: File[], formState: FormState) => {
+  try {
+    const { id: playlistId } = await createPlaylist("Plyalist");
+
+    for (let i = 0; i < sources.length; i++) {
+      const fileKey = `${sources[i].name}&&&${playlistId}`;
+      await uploadToS3(sources[i], fileKey, SOURCES_BUCKET);
+      await createSource(sources[i].name, playlistId, fileKey);
+    }
+
+    for (let i = 0; i < sources.length; i++) {
+      await getPodcastContext(sources[i], playlistId);
+    }
+
+    return toFormState("SUCCESS", "Successfully processed sources", {
+      playlistId: playlistId,
+    });
+  } catch (error) {
+    console.log("Something went wrong: ", error);
+    return fromErrorToFormState(error);
+  }
+};
 
 export const uploadDocument = async (
   formState: { url: string | null },
@@ -18,23 +92,27 @@ export const uploadDocument = async (
   const fields = Object.fromEntries(formData);
   const document: File = fields.document as File;
   const instructions: string = fields.instructions as string;
-  console.log(fields);
   const audioFiles: string[] = [];
   const fileNameAndExtension = `${uuidv4()}.mp3`;
   const finalPodcastPath = path.join(process.cwd(), fileNameAndExtension);
 
   try {
     // TODO: Make notebook name user generated
-    // const inputText = await getPodcastContext(document, "notebook-1");
-    // const script = await generateScript(inputText, instructions);
+    const inputText = await getPodcastContext(document, "notebook-1");
+    const script = await generateScript(inputText, instructions);
 
-    // await generateAudioFromDialogue(script, audioFiles);
+    await generateAudioFromDialogue(script, audioFiles);
 
-    // await combineAudioFiles(audioFiles, finalPodcastPath);
+    await combineAudioFiles(audioFiles, finalPodcastPath);
 
-    // await uploadToS3(finalPodcastPath, fileNameAndExtension);
+    const podcastFile = fs.readFileSync(finalPodcastPath);
 
-    const audioUrl = await fetchFromS3(DEMO_S3_FILE || fileNameAndExtension);
+    await uploadToS3(podcastFile, fileNameAndExtension, PODCASTS_BUCKET);
+
+    const audioUrl = await fetchFromS3(
+      DEMO_S3_FILE || fileNameAndExtension,
+      PODCASTS_BUCKET
+    );
     return { url: audioUrl };
   } catch (error) {
     console.log("Something went wrong: ", error);

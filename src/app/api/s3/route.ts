@@ -6,7 +6,6 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const BUCKET = "podcastsb";
 const REGION = "us-east-1";
 
 const credentials = {
@@ -22,12 +21,13 @@ const s3 = new S3Client({
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const key = searchParams.get("key");
-  
-  if (!key) {
+  const bucket = searchParams.get("bucket");
+
+  if (!key || !bucket) {
     return NextResponse.json({ error: "Key is required" }, { status: 400 });
   }
 
-  const input = { Bucket: BUCKET, Key: key };
+  const input = { Bucket: bucket, Key: key };
 
   const command = new GetObjectCommand(input);
 
@@ -36,13 +36,13 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { key } = await req.json();
+  const { key, bucket } = await req.json();
 
-  if (!key) {
+  if (!key || !bucket) {
     return NextResponse.json({ error: "Key is required" }, { status: 400 });
   }
 
-  const input = { Bucket: BUCKET, Key: key };
+  const input = { Bucket: bucket, Key: key };
 
   const command = new PutObjectCommand(input);
 

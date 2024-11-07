@@ -23,6 +23,10 @@ export const copyTextToClipboard = async (text: string) => {
   }
 };
 
+export const pluraliseItem = (numItem: number, item: string) => {
+  return numItem > 1 || numItem == 0 ? `${item}s` : item;
+};
+
 export const PODCASTS_BUCKET = "podcastsb";
 export const SOURCES_BUCKET = "playlistsources";
 

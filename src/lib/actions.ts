@@ -11,9 +11,34 @@ import { Dialogue } from "./types";
 import { FormState, fromErrorToFormState, toFormState } from "./form-utils";
 import { createPlaylist, createPodcastEpisode, createSource } from "./data";
 import { getContext } from "./context";
+import { sql } from "@vercel/postgres";
+import { revalidatePath } from "next/cache";
 
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const DEMO_S3_FILE = ""; // Set to empty when not testing 90b808ab-059d-457b-9fa6-cfc65457e47a.mp3
+
+export const editPlaylistTitle = async (
+  playlistId: string,
+  formState: FormState,
+  formData: FormData
+) => {
+  console.log("hello");
+  try {
+    const { title } = Object.fromEntries(formData.entries());
+    console.log(title);
+    await sql`
+      UPDATE playlists
+      SET title = ${title as string}
+      WHERE id = ${playlistId};
+    `;
+    revalidatePath("/");
+
+    return toFormState("SUCCESS", "Successfully updated playlist title");
+  } catch (error) {
+    console.error(error);
+    return fromErrorToFormState(error);
+  }
+};
 
 export const createPodcast = async (
   playlistId: string,

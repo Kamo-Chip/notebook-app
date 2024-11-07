@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,6 +21,7 @@ export default function RootLayout({
           <span className="text-3xl">NootBookLM</span>
           <div className="max-w-5xl w-full mx-auto">{children}</div>
         </div>
+        <Toaster />
       </body>
     </html>
   );

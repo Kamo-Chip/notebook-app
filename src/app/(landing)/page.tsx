@@ -1,9 +1,11 @@
-import CreateFirstPlaylistCard from "@/components/landing-page/create-first-playlist-card";
-
-export default function Home() {
+import PlaylistContainer from "@/components/containers/playlist-container";
+import { Suspense } from "react";
+export default async function Home() {
   return (
-    <div className="flex items-center justify-center h-[calc(100vh-6rem)]">
-      <CreateFirstPlaylistCard />
+    <div className="flex flex-col pt-48">
+      <Suspense fallback={<span>Loading...</span>}>
+        <PlaylistContainer />
+      </Suspense>
     </div>
   );
 }

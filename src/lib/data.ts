@@ -57,6 +57,34 @@ export const fetchPlaylist = async (id: string) => {
   return result.rows[0];
 };
 
+export const fetchPlaylists = async () => {
+  const result = await sql<Playlist>`
+    SELECT * FROM playlists
+    ORDER BY created_at;
+  `;
+
+  return result.rows;
+};
+
+export const fetchSourceCount = async (playlistId: string) => {
+  const result = await sql`
+    SELECT COUNT(*)
+    FROM sources
+    WHERE playlist_id = ${playlistId}
+  `;
+
+  return result.rows[0];
+};
+
+export const fetchPodcastCount = async (playlistId: string) => {
+  const result = await sql`
+    SELECT COUNT(*)
+    FROM podcasts
+    WHERE playlist_id = ${playlistId};
+  `;
+
+  return result.rows[0];
+};
 export const fetchPlaylistData = async (id: string) => {
   const data = await Promise.all([
     fetchPlaylist(id),

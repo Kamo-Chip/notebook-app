@@ -1,12 +1,5 @@
-import { DropZone } from "../drop-zone";
+import CreatePlaylistDialog from "../create-playlist-dialog";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
 
 function CreateFirstPlaylistCard() {
   return (
@@ -23,22 +16,12 @@ function CreateFirstPlaylistCard() {
         <CreatePlaylistExplainerItem text={"Create podcasts"} icon="🎙️" />
         <CreatePlaylistExplainerItem text={"Get smart"} icon="🧠" />
       </div>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="w-fit text-lg font-medium">Create</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogTitle>Add Source</DialogTitle>
-          <DialogDescription>
-            Sources are the documents used to generate the podcast
-          </DialogDescription>
-          <DropZone />
-        </DialogContent>
-      </Dialog>
+      <CreatePlaylistDialog
+        trigger={<Button className="w-fit text-lg font-medium">Create</Button>}
+      />
     </div>
   );
 }
-
 
 const CreatePlaylistExplainerItem = ({
   text,

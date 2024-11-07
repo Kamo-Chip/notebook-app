@@ -1,15 +1,14 @@
 "use client";
 
+import { processSources } from "@/lib/actions";
+import { EMPTY_FORM_STATE } from "@/lib/form-utils";
 import { ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import TooltipWrapper from "./wrappers/tooltip-wrapper";
-import { processSources } from "@/lib/actions";
-import { useFormStatus } from "react-dom";
-import { useRouter } from "next/navigation";
-import { EMPTY_FORM_STATE } from "@/lib/form-utils";
 const MAX_SOURCES = 3;
 export const DropZone = () => {
   const [sources, setSources] = useState<File[]>([]);

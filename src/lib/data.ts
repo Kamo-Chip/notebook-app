@@ -95,9 +95,9 @@ export const fetchPlaylistData = async (id: string) => {
 };
 
 export const fetchPodcasts = async (playlistId: string) => {
-  const result = await sql<Playlist>`
+  const result = await sql<Podcast>`
     SELECT * FROM podcasts
-    WHERE id = ${playlistId}
+    WHERE playlist_id = ${playlistId}
   `;
 
   return result.rows;

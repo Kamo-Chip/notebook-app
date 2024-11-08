@@ -17,7 +17,9 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import PlaylistCardHeader from "./playlist-card-header";
+import PlaylistCardHeader from "./editable-card-header";
+import EditableCardHeader from "./editable-card-header";
+import { editPlaylistTitle } from "@/lib/actions";
 
 async function PlaylistCard({ playlist }: { playlist: Playlist }) {
   const { count: numSources } = await fetchSourceCount(playlist.id);
@@ -26,7 +28,11 @@ async function PlaylistCard({ playlist }: { playlist: Playlist }) {
   return (
     <Card>
       <CardContent className=" h-fit relative">
-        <PlaylistCardHeader playlist={playlist} />
+        <EditableCardHeader
+          item={playlist}
+          itemType="playlists"
+          formAction={editPlaylistTitle}
+        />
         <div className="mt-4">
           <Badge>
             {numPodcasts} {pluraliseItem(numPodcasts, "podcast")}

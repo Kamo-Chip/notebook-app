@@ -59,7 +59,7 @@ export const generateAudioFromDialogue = async (
 export const combineAudioFiles = async (
   audioFiles: string[],
   outputFilePath: string
-): Promise<void> => {
+): Promise<number> => {
   const ffmpegCommand = ffmpeg();
 
   audioFiles.forEach((file) => ffmpegCommand.input(file));
@@ -68,7 +68,15 @@ export const combineAudioFiles = async (
     ffmpegCommand
       .on("end", () => {
         audioFiles.forEach((file) => fs.unlinkSync(file));
-        resolve();
+        // Get the duration of the combined file
+        ffmpeg.ffprobe(outputFilePath, (err, metadata) => {
+          if (err) {
+            return reject(err);
+          }
+          const duration = metadata.format.duration;
+          console.log("Duration: ", duration);
+          resolve(duration || 0);
+        });
       })
       .on("error", (err) => reject(err))
       .mergeToFile(outputFilePath, "");

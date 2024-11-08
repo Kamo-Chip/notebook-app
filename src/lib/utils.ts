@@ -27,6 +27,21 @@ export const pluraliseItem = (numItem: number, item: string) => {
   return numItem > 1 || numItem == 0 ? `${item}s` : item;
 };
 
+export const formatDuration = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor(seconds / 60);
+
+  let formattedDuration = "";
+  if (hours > 0) {
+    formattedDuration += `${hours}h `;
+  }
+  if (minutes > 0 || hours === 0) {
+    formattedDuration += `${minutes}m`;
+  }
+
+  return formattedDuration.trim();
+};
+
 export const PODCASTS_BUCKET = "podcastsb";
 export const SOURCES_BUCKET = "playlistsources";
 

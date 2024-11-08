@@ -1,39 +1,61 @@
 "use server";
 
+import { sql } from "@vercel/postgres";
 import fs from "fs";
+import { revalidatePath } from "next/cache";
 import path from "path";
+import { v4 as uuidv4 } from "uuid";
 import { combineAudioFiles, generateAudioFromDialogue } from "./audio";
+import { getContext } from "./context";
+import { createPlaylist, createPodcastEpisode, createSource } from "./data";
+import { FormState, fromErrorToFormState, toFormState } from "./form-utils";
 import { loadDocumentIntoPinecone } from "./pinecone";
 import { fetchFromS3, uploadToS3 } from "./s3";
-import { PODCASTS_BUCKET, SOURCES_BUCKET, SYSTEM_PROMPT } from "./utils";
-import { v4 as uuidv4 } from "uuid";
 import { Dialogue } from "./types";
-import { FormState, fromErrorToFormState, toFormState } from "./form-utils";
-import { createPlaylist, createPodcastEpisode, createSource } from "./data";
-import { getContext } from "./context";
-import { sql } from "@vercel/postgres";
-import { revalidatePath } from "next/cache";
-
+import { PODCASTS_BUCKET, SOURCES_BUCKET, SYSTEM_PROMPT } from "./utils";
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const DEMO_S3_FILE = ""; // Set to empty when not testing 90b808ab-059d-457b-9fa6-cfc65457e47a.mp3
 
 export const editPlaylistTitle = async (
-  playlistId: string,
+  id: string,
   formState: FormState,
   formData: FormData
 ) => {
-  console.log("hello");
   try {
     const { title } = Object.fromEntries(formData.entries());
-    console.log(title);
+
     await sql`
       UPDATE playlists
       SET title = ${title as string}
-      WHERE id = ${playlistId};
+      WHERE id = ${id}
     `;
+
     revalidatePath("/");
 
-    return toFormState("SUCCESS", "Successfully updated playlist title");
+    return toFormState("SUCCESS", "Successfully updated title");
+  } catch (error) {
+    console.error(error);
+    return fromErrorToFormState(error);
+  }
+};
+
+export const editPodcastTitle = async (
+  id: string,
+  formState: FormState,
+  formData: FormData
+) => {
+  try {
+    const { title } = Object.fromEntries(formData.entries());
+
+    await sql`
+      UPDATE podcasts
+      SET title = ${title as string}
+      WHERE id = ${id}
+    `;
+
+    revalidatePath("/");
+
+    return toFormState("SUCCESS", "Successfully updated title");
   } catch (error) {
     console.error(error);
     return fromErrorToFormState(error);
@@ -64,13 +86,19 @@ export const createPodcast = async (
 
     await generateAudioFromDialogue(script, audioFiles);
 
-    await combineAudioFiles(audioFiles, finalPodcastPath);
+    const duration = await combineAudioFiles(audioFiles, finalPodcastPath);
 
     const podcastFile = fs.readFileSync(finalPodcastPath);
 
-    await uploadToS3(podcastFile, fileNameAndExtension, PODCASTS_BUCKET);
+    await uploadToS3(podcastFile, fileNameAndExtension, PODCASTS_BUCKET, "audio/mpeg");
 
-    await createPodcastEpisode(title, playlistId, fileNameAndExtension, 3);
+    console.log("Duration: ", duration);
+    await createPodcastEpisode(
+      title,
+      playlistId,
+      fileNameAndExtension,
+      120
+    );
 
     const audioUrl = await fetchFromS3(
       DEMO_S3_FILE || fileNameAndExtension,
@@ -79,7 +107,8 @@ export const createPodcast = async (
 
     fs.unlinkSync(finalPodcastPath);
 
-    return toFormState("SUCCESS", "Successfully create podcast", {
+    revalidatePath("/playlists");
+    return toFormState("SUCCESS", "Successfully created podcast", {
       url: audioUrl,
     });
   } catch (error) {
@@ -89,11 +118,11 @@ export const createPodcast = async (
 
 export const processSources = async (sources: File[], formState: FormState) => {
   try {
-    const { id: playlistId } = await createPlaylist("Plyalist");
+    const { id: playlistId } = await createPlaylist("Untitled Playlist");
 
     for (let i = 0; i < sources.length; i++) {
-      const fileKey = `${sources[i].name}&&&${playlistId}`;
-      await uploadToS3(sources[i], fileKey, SOURCES_BUCKET);
+      const fileKey = `${playlistId}_${sources[i].name}`;
+      await uploadToS3(sources[i], fileKey, SOURCES_BUCKET, "application/pdf");
       await createSource(sources[i].name, playlistId, fileKey);
     }
 
@@ -110,40 +139,6 @@ export const processSources = async (sources: File[], formState: FormState) => {
   }
 };
 
-export const uploadDocument = async (
-  formState: { url: string | null },
-  formData: FormData
-) => {
-  const fields = Object.fromEntries(formData);
-  const document: File = fields.document as File;
-  const instructions: string = fields.instructions as string;
-  const audioFiles: string[] = [];
-  const fileNameAndExtension = `${uuidv4()}.mp3`;
-  const finalPodcastPath = path.join(process.cwd(), fileNameAndExtension);
-
-  try {
-    // TODO: Make notebook name user generated
-    const inputText = await getPodcastContext(document, "notebook-1");
-    const script = await generateScript(inputText, instructions);
-
-    await generateAudioFromDialogue(script, audioFiles);
-
-    await combineAudioFiles(audioFiles, finalPodcastPath);
-
-    const podcastFile = fs.readFileSync(finalPodcastPath);
-
-    await uploadToS3(podcastFile, fileNameAndExtension, PODCASTS_BUCKET);
-
-    const audioUrl = await fetchFromS3(
-      DEMO_S3_FILE || fileNameAndExtension,
-      PODCASTS_BUCKET
-    );
-    return { url: audioUrl };
-  } catch (error) {
-    console.log("Something went wrong: ", error);
-    return { url: null };
-  }
-};
 
 const getPodcastContext = async (document: File, notebook: string) => {
   try {

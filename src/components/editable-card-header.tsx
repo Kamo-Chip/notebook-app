@@ -1,40 +1,56 @@
 "use client";
 
-import { Playlist } from "@/lib/types";
-import {
-    EllipsisHorizontalIcon
-} from "@heroicons/react/24/outline";
+import { Playlist, Podcast } from "@/lib/types";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { useState } from "react";
-import EditPlaylistForm from "./forms/edit-playlist-form";
+import EditCardHeaderForm from "./forms/edit-card-header-form";
 import { CardHeader, CardTitle } from "./ui/card";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import TooltipWrapper from "./wrappers/tooltip-wrapper";
+import { FormState } from "@/lib/form-utils";
 
-function PlaylistCardHeader({ playlist }: { playlist: Playlist }) {
+function EditableCardHeader({
+  item,
+  itemType,
+  formAction,
+}: {
+  item: Playlist | Podcast;
+  itemType: string;
+  formAction: (
+    id: string,
+    formState: FormState,
+    formData: FormData
+  ) => Promise<FormState>;
+}) {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <CardHeader className="flex flex-row justify-between items-start">
+    <CardHeader
+      className="flex flex-row justify-between items-start mb-8"
+      onClick={(e) => {
+        if (isEditing) e.preventDefault();
+      }}
+    >
       <div>
         {/* TODO: Add auto focus */}
-        {!isEditing && (
-          <CardTitle className="text-4xl">{playlist.title}</CardTitle>
-        )}
-        <EditPlaylistForm
-          playlist={playlist}
+        {!isEditing && <CardTitle className="text-4xl truncate max-w-[220px]">{item.title}</CardTitle>}
+        <EditCardHeaderForm
+          item={item}
           setIsEditing={setIsEditing}
           isEditing={isEditing}
+          itemType={itemType}
+          formAction={formAction}
         />
 
         <p className="text-gray-600 mt-2">
-          {format(new Date(playlist.created_at).toString(), "dd MMM yyyy")}
+          {format(new Date(item.created_at).toString(), "dd MMM yyyy")}
         </p>
       </div>
       <DropdownMenu>
@@ -68,4 +84,4 @@ function PlaylistCardHeader({ playlist }: { playlist: Playlist }) {
   );
 }
 
-export default PlaylistCardHeader;
+export default EditableCardHeader;

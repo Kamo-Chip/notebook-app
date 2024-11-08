@@ -3,7 +3,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 export const uploadToS3 = async (
   file: File | Buffer<ArrayBufferLike>,
   key: string,
-  bucket: string
+  bucket: string,
+  contentType: "audio/mpeg" | "application/pdf"
 ) => {
   try {
     const s3Response = await fetch(`${BASE_URL}/api/s3`, {
@@ -17,7 +18,7 @@ export const uploadToS3 = async (
     await fetch(s3Data.url, {
       method: "PUT",
       headers: {
-        "Content-Type": "audio/mpeg",
+        "Content-Type": contentType,
       },
       body: file,
     });

@@ -1,25 +1,32 @@
+import useFormStatusToast from "@/hooks/useFormStatusToast";
+import { EMPTY_FORM_STATE, FormState } from "@/lib/form-utils";
+import { Playlist, Podcast } from "@/lib/types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@radix-ui/react-icons";
+import clsx from "clsx";
+import { Dispatch, SetStateAction, useActionState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Playlist } from "@/lib/types";
-import { Dispatch, SetStateAction, useActionState } from "react";
-import { EMPTY_FORM_STATE } from "@/lib/form-utils";
-import clsx from "clsx";
-import useFormStatusToast from "@/hooks/useFormStatusToast";
-import { editItemTitle } from "@/lib/actions";
 
-function EditPlaylistForm({
-  playlist,
+function EditCardHeaderForm({
+  item,
   setIsEditing,
   isEditing,
+  itemType,
+  formAction,
 }: {
-  playlist: Playlist;
+  item: Playlist | Podcast;
   setIsEditing: Dispatch<SetStateAction<boolean>>;
   isEditing: boolean;
+  itemType: string;
+  formAction: (
+    id: string,
+    formState: FormState,
+    formData: FormData
+  ) => Promise<FormState>;
 }) {
   const [state, action, pending] = useActionState(
-    editItemTitle.bind(null, playlist.id, "playlists"),
+    formAction.bind(null, item.id),
     EMPTY_FORM_STATE
   );
 
@@ -28,12 +35,14 @@ function EditPlaylistForm({
   return (
     <form className={clsx("flex")} action={action}>
       <Input
-        defaultValue={playlist.title}
+        defaultValue={item.title}
         className={clsx(
           "shadow-none font-semibold tracking-tight text-4xl h-fit mr-4",
-          { hidden: !isEditing }
+          {
+            hidden: !isEditing,
+          }
         )}
-        id="title"
+        id={item.id}
         name="title"
       />
       <div
@@ -43,7 +52,10 @@ function EditPlaylistForm({
       >
         <Button
           type="submit"
-          onClick={() => setIsEditing(false)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditing(false);
+          }}
           className="bg-green-500/60 text-green-950"
         >
           <CheckIcon className="w-8 h-8 " />
@@ -52,8 +64,10 @@ function EditPlaylistForm({
           onClick={(e) => {
             e.preventDefault();
             setIsEditing(false);
-            const input: HTMLInputElement = document.querySelector("#title")!;
-            input.value = playlist.title;
+            const input: HTMLInputElement = document.querySelector(
+              `#${item.id}`
+            )!;
+            input.value = item.title;
           }}
           className="bg-red-500/60 text-red-950"
         >
@@ -64,4 +78,4 @@ function EditPlaylistForm({
   );
 }
 
-export default EditPlaylistForm;
+export default EditCardHeaderForm;

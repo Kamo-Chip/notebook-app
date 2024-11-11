@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,6 +23,13 @@ export default function RootLayout({
           <div className="max-w-5xl w-full mx-auto">{children}</div>
         </div>
         <Toaster />
+        <Image
+          src={"/assets/wave.svg"}
+          width={100}
+          height={100}
+          alt=""
+          className="fixed bottom-0 left-0 right-0 w-screen z-[-1]"
+        />
       </body>
     </html>
   );

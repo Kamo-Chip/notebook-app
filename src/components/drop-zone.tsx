@@ -9,17 +9,25 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import TooltipWrapper from "./wrappers/tooltip-wrapper";
-const MAX_SOURCES = 3;
-export const DropZone = () => {
+import { MAX_SOURCES } from "@/lib/utils";
+
+export const DropZone = ({
+  playlistId,
+  closeDialog,
+}: {
+  playlistId?: string;
+  closeDialog: () => void;
+}) => {
   const [sources, setSources] = useState<File[]>([]);
   const router = useRouter();
   const [state, action, pending] = useActionState(
-    processSources.bind(null, sources),
+    processSources.bind(null, sources, playlistId || ""),
     EMPTY_FORM_STATE
   );
 
   useEffect(() => {
     if (state.status === "SUCCESS" && state.data?.playlistId!) {
+      closeDialog();
       router.push(`/playlists?playlistId=${state.data.playlistId}`);
     }
   }, [state]);
@@ -113,7 +121,11 @@ export const DropZone = () => {
       />
       {sources.length > 0 && (
         <Button className="mx-auto" type="submit" disabled={pending}>
-          {pending ? "Loading..." : "Create Playlist"}
+          {pending
+            ? "Loading..."
+            : playlistId
+            ? "Add source"
+            : "Create playlist"}
         </Button>
       )}
     </form>

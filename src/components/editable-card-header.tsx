@@ -40,7 +40,7 @@ function EditableCardHeader({
     >
       <div>
         {/* TODO: Add auto focus */}
-        {!isEditing && <CardTitle className="text-4xl truncate max-w-[220px]">{item.title}</CardTitle>}
+        {!isEditing && <CardTitle className="text-4xl truncate max-w-[280px]">{item.title}</CardTitle>}
         <EditCardHeaderForm
           item={item}
           setIsEditing={setIsEditing}

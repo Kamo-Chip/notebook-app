@@ -44,7 +44,7 @@ export const formatDuration = (seconds: number) => {
 
 export const PODCASTS_BUCKET = "podcastsb";
 export const SOURCES_BUCKET = "playlistsources";
-
+export const MAX_SOURCES = 3;
 export const SYSTEM_PROMPT = `
 You are a world-class dialogue producer tasked with transforming the provided input text into an engaging and informative conversation among 2 participants. The input may be unstructured or messy, sourced from PDFs. Your goal is to extract the most interesting and insightful content for a compelling discussion.
 

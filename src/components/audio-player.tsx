@@ -25,7 +25,7 @@ function AudioPlayer() {
   return (
     <div className=" absolute bottom-0 left-0 right-0 p-4 h-[86px] border-t flex">
       {!audioUrl && <span className="m-auto text-gray-600">No podcast is playing</span>}
-      {audioUrl && <audio src={audioUrl} controls autoPlay className="w-full bg-transparent"/>}
+      {audioUrl && <audio src={audioUrl} controls autoPlay className="w-full bg-transparent" id="audioPlayer"/>}
     </div>
   );
 }

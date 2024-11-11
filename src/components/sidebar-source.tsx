@@ -17,34 +17,25 @@ import {
 } from "./ui/dropdown-menu";
 
 function SidebarSource({ source }: { source: Source }) {
-  const [showEllipsis, setShowEllipsis] = useState(false);
-
   return (
     <div
       key={source.id}
       className="flex hover:bg-border p-2 rounded-3xl w-[226px]"
-      //   onMouseOver={() => setShowEllipsis(true)}
-      //   onMouseOut={() => setShowEllipsis(false)}
     >
       <Dialog>
-        <DialogTrigger className="flex">
+        <DialogTrigger className="flex justify-between w-full">
           <span className="flex">
-            <DocumentIcon className="w-6 h-6" />
-            <span className={clsx("truncate max-w-40")}>
-              {source.title}dfsdfdsdsfsf
-            </span>
+            <span className={clsx("truncate max-w-40")}>{source.title}</span>
           </span>
 
-          {/* {showEllipsis && ( */}
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <EllipsisHorizontalIcon className="w-6 h-6" />
+              <EllipsisHorizontalIcon className="w-6 h-6 " />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {/* )} */}
         </DialogTrigger>
         <DialogContent>
           <DialogTitle>Document</DialogTitle>

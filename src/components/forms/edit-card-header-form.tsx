@@ -37,7 +37,7 @@ function EditCardHeaderForm({
       <Input
         defaultValue={item.title}
         className={clsx(
-          "shadow-none font-semibold tracking-tight text-4xl h-fit mr-4",
+          "shadow-none font-medium tracking-tight text-4xl h-fit mr-4",
           {
             hidden: !isEditing,
           }

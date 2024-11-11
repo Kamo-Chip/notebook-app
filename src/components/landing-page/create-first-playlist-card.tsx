@@ -1,23 +1,25 @@
-import CreatePlaylistDialog from "../create-playlist-dialog";
+import AddSourceDialog from "../add-source-dialog";
 import { Button } from "../ui/button";
 
 function CreateFirstPlaylistCard() {
   return (
-    <div className="border rounded-3xl shadow-md p-6 flex flex-col gap-16 items-center">
+    <div className=" rounded-3xl p-6 flex flex-col gap-12 items-center">
       <div className="flex flex-col gap-4">
-        <h3 className="text-4xl text-center">Create your first playlist</h3>
-        <span className=" text-gray-700 text-center text-xl">
-          A playlist is a collection of podcasts sharing the same sources
+        <h3 className="text-8xl text-center font-medium whitespace-nowrap">
+          Create your first playlist
+        </h3>
+        <span className=" text-center text-xl mt-4">
+          Create byte-sized podcasts from your notes
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-8 w-full">
-        <CreatePlaylistExplainerItem text={"Upload sources"} icon="📑" />
+      <div className="grid grid-cols-3 gap-8 w-full mt-10">
+        <CreatePlaylistExplainerItem text={"Upload sources"} icon="📝" />
         <CreatePlaylistExplainerItem text={"Create podcasts"} icon="🎙️" />
         <CreatePlaylistExplainerItem text={"Get smart"} icon="🧠" />
       </div>
-      <CreatePlaylistDialog
-        trigger={<Button className="w-fit text-lg font-medium">Create</Button>}
+      <AddSourceDialog
+        trigger={<Button className="w-fit text-2xl font-medium p-6">Create</Button>}
       />
     </div>
   );
@@ -32,14 +34,14 @@ const CreatePlaylistExplainerItem = ({
 }) => {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
-      <span className="text-7xl rounded-full bg-gradient-to-tr from-cyan-500 to-lime-500 w-fit p-7">
+      <span className="text-8xl rounded-full w-fit p-2">
         {icon}
       </span>
-      <span className="text-xl font-medium">{text}</span>
-      <span className="text-gray-700">
+      <span className="text-xl">{text}</span>
+      {/* <span className="text-gray-700">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam id
         lacinia purus.
-      </span>
+      </span> */}
     </div>
   );
 };

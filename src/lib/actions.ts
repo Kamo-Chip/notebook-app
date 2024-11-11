@@ -90,15 +90,15 @@ export const createPodcast = async (
 
     const podcastFile = fs.readFileSync(finalPodcastPath);
 
-    await uploadToS3(podcastFile, fileNameAndExtension, PODCASTS_BUCKET, "audio/mpeg");
+    await uploadToS3(
+      podcastFile,
+      fileNameAndExtension,
+      PODCASTS_BUCKET,
+      "audio/mpeg"
+    );
 
     console.log("Duration: ", duration);
-    await createPodcastEpisode(
-      title,
-      playlistId,
-      fileNameAndExtension,
-      120
-    );
+    await createPodcastEpisode(title, playlistId, fileNameAndExtension, 120);
 
     const audioUrl = await fetchFromS3(
       DEMO_S3_FILE || fileNameAndExtension,
@@ -116,29 +116,39 @@ export const createPodcast = async (
   }
 };
 
-export const processSources = async (sources: File[], formState: FormState) => {
+export const processSources = async (
+  sources: File[],
+  playlistId: string,
+  formState: FormState
+) => {
   try {
-    const { id: playlistId } = await createPlaylist("Untitled Playlist");
+    let playId = playlistId;
+
+    if (!playId) {
+      const playlist = await createPlaylist("Untitled Playlist");
+      playId = playlist.id;
+    }
+
+    // let { id: playlistId } = await createPlaylist("Untitled Playlist");
 
     for (let i = 0; i < sources.length; i++) {
-      const fileKey = `${playlistId}_${sources[i].name}`;
+      const fileKey = `${playId}_${sources[i].name}`;
       await uploadToS3(sources[i], fileKey, SOURCES_BUCKET, "application/pdf");
-      await createSource(sources[i].name, playlistId, fileKey);
+      await createSource(sources[i].name, playId, fileKey);
     }
 
     for (let i = 0; i < sources.length; i++) {
-      await getPodcastContext(sources[i], playlistId);
+      await getPodcastContext(sources[i], playId);
     }
 
     return toFormState("SUCCESS", "Successfully processed sources", {
-      playlistId: playlistId,
+      playlistId: playId,
     });
   } catch (error) {
     console.log("Something went wrong: ", error);
     return fromErrorToFormState(error);
   }
 };
-
 
 const getPodcastContext = async (document: File, notebook: string) => {
   try {

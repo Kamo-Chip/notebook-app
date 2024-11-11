@@ -24,7 +24,7 @@ function DocumentViewer({ documentKey }: { documentKey: string }) {
         src={documentUrl}
         width="500"
         height="500"
-        className="rounded-3xl  shadow-xl border"
+        className="rounded-3xl shadow-xl border"
       />
     </div>
   );

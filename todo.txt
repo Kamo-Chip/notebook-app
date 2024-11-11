@@ -1,10 +1,7 @@
-- Fix podcast creation bug (not being added to db)
 - Make deleteable
     - podcast
     - source
     - playlist
-- Fix document view
-- Handle adding source on sidebar
-- Add length to podcast
 - Make pods shareable
-- Add loading states
+- Gracefully handle switching currently playing podcast
+- Add custom audio player

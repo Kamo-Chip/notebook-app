@@ -1,10 +1,18 @@
+"use client";
+
 import useFormStatusToast from "@/hooks/useFormStatusToast";
 import { EMPTY_FORM_STATE, FormState } from "@/lib/form-utils";
 import { Playlist, Podcast } from "@/lib/types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@radix-ui/react-icons";
 import clsx from "clsx";
-import { Dispatch, SetStateAction, useActionState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useActionState,
+  useEffect,
+  useRef,
+} from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -30,23 +38,32 @@ function EditCardHeaderForm({
     EMPTY_FORM_STATE
   );
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useFormStatusToast(state);
 
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  });
+
   return (
-    <form className={clsx("flex")} action={action}>
+    <form className={clsx("flex")} action={action} autoFocus>
       <Input
         defaultValue={item.title}
         className={clsx(
-          "shadow-none font-medium tracking-tight text-4xl h-fit mr-4",
+          "shadow-none font-medium tracking-tight text-3xl h-fit w-full",
           {
             hidden: !isEditing,
           }
         )}
-        id={item.id}
+        id={`header-${item.id}`}
         name="title"
+        ref={inputRef}
       />
       <div
-        className={clsx("absolute bottom-6 right-6 flex gap-4", {
+        className={clsx("absolute bottom-4 right-4 flex gap-2", {
           hidden: !isEditing,
         })}
       >
@@ -65,7 +82,7 @@ function EditCardHeaderForm({
             e.preventDefault();
             setIsEditing(false);
             const input: HTMLInputElement = document.querySelector(
-              `#${item.id}`
+              `#header-${item.id}`
             )!;
             input.value = item.title;
           }}

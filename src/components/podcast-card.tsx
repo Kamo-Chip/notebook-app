@@ -1,30 +1,64 @@
 "use client";
 
+import { deletePodcastAction, editPodcastTitle } from "@/lib/actions";
 import { Podcast } from "@/lib/types";
 import { formatDuration } from "@/lib/utils";
+import { PlayIcon } from "@heroicons/react/24/solid";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import EditableCardHeader from "./editable-card-header";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
-import { editPodcastTitle } from "@/lib/actions";
-import { useEffect, useState } from "react";
-import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
 
 function PodcastCard({ podcast }: { podcast: Podcast }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
   const audioPlayer: HTMLAudioElement | null =
-    document.querySelector("#audioPlayer");
+    document.querySelector("#audioPlayer") || null;
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const setPlaying = () => {
+    if (isPlaying) {
+      audioPlayer?.pause();
+    } else {
+      audioPlayer?.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
 
   useEffect(() => {
-    console.log(searchParams.get("podcast"));
-    console.log(podcast.id);
+    const listenToLocalStorageChange = () => {
+      const isPlayingStorage = localStorage.getItem("isPlaying") === "true";
+      const isMatch = localStorage.getItem("podcastKey") === podcast.key;
+
+      if (isMatch && isPlayingStorage) {
+        setIsPlaying(true);
+      } else if (isMatch && !isPlayingStorage) {
+        setIsPlaying(false);
+      }
+    };
+
+    window.addEventListener("isPlaying", listenToLocalStorageChange);
+    // return () =>
+    //   window.removeEventListener("isPlaying", listenToLocalStorageChange);
+  }, []);
+
+  useEffect(() => {
     if (searchParams.get("podcast") === podcast.key) {
-      setIsPlaying(true);
+      try {
+        setTimeout(() => {
+          audioPlayer?.play();
+          setIsLoading(false);
+        }, 500);
+      } catch (error) {
+        console.log("failed");
+        console.log(error);
+      }
     } else {
       setIsPlaying(false);
+      setIsLoading(false);
     }
   }, [searchParams]);
 
@@ -35,27 +69,32 @@ function PodcastCard({ podcast }: { podcast: Podcast }) {
           item={podcast}
           itemType="podcasts"
           formAction={editPodcastTitle}
+          deleteAction={deletePodcastAction}
         />
         <div className="mt-auto">
           <Badge
             className="cursor-pointer"
             onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              params.set("podcast", podcast.key);
-              replace(`${pathname}?${params.toString()}`);
-              if (isPlaying) {
-                audioPlayer?.pause();
+              if (podcast.key !== searchParams.get("podcast")) {
+                setIsLoading(true);
+                const params = new URLSearchParams(searchParams);
+                params.set("podcast", podcast.key);
+                replace(`${pathname}?${params.toString()}`);
               } else {
-                audioPlayer?.play();
+                setPlaying();
               }
-              setIsPlaying(!isPlaying);
             }}
           >
-            {isPlaying ? (
-              <PauseIcon className="w-6 h-6" fill="white" />
+            {!isLoading ? (
+              isPlaying ? (
+                <img src="/assets/bars.svg" className="w-6 h-6" />
+              ) : (
+                <PlayIcon className="w-6 h-6" />
+              )
             ) : (
-              <PlayIcon className="w-6 h-6" />
+              <img src="/assets/bars-loading.svg" className="w-6 h-6" />
             )}
+
             <span className="ml-2">{formatDuration(podcast.length)}</span>
           </Badge>
         </div>

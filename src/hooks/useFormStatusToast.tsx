@@ -5,8 +5,6 @@ import { toast } from "sonner";
 function useFormStatusToast(formState: FormState) {
   useEffect(() => {
     if (formState) {
-      console.log(formState);
-
       if (formState.status === "ERROR") {
         toast.error(formState.message, {
           position: "top-right",

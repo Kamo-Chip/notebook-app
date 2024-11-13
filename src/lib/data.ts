@@ -15,11 +15,12 @@ export const createPlaylist = async (title: string) => {
 export const createSource = async (
   title: string,
   playlistId: string,
-  key: string
+  key: string,
+  id_prefix: string
 ) => {
   const result = await sql<Source>`
-      INSERT INTO sources (title, playlist_id, key)
-      VALUES (${title}, ${playlistId}, ${key})
+      INSERT INTO sources (title, playlist_id, key, id_prefix)
+      VALUES (${title}, ${playlistId}, ${key}, ${id_prefix})
       RETURNING id;
     `;
 
@@ -101,4 +102,25 @@ export const fetchPodcasts = async (playlistId: string) => {
   `;
 
   return result.rows;
+};
+
+export const deletePodcast = async (id: string) => {
+  await sql`
+    DELETE FROM podcasts 
+    WHERE id = ${id};
+  `;
+};
+
+export const deleteSource = async (id: string) => {
+  await sql`
+    DELETE FROM sources 
+    WHERE id = ${id};
+  `;
+};
+
+export const deletePlaylist = async (id: string) => {
+  await sql`
+    DELETE FROM playlists 
+    WHERE id = ${id};
+  `;
 };

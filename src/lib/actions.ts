@@ -7,11 +7,18 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { combineAudioFiles, generateAudioFromDialogue } from "./audio";
 import { getContext } from "./context";
-import { createPlaylist, createPodcastEpisode, createSource } from "./data";
+import {
+  createPlaylist,
+  createPodcastEpisode,
+  createSource,
+  deletePlaylist,
+  deletePodcast,
+  deleteSource,
+} from "./data";
 import { FormState, fromErrorToFormState, toFormState } from "./form-utils";
-import { loadDocumentIntoPinecone } from "./pinecone";
-import { fetchFromS3, uploadToS3 } from "./s3";
-import { Dialogue } from "./types";
+import { deleteRecords, loadDocumentIntoPinecone } from "./pinecone";
+import { deleteFromS3, fetchFromS3, uploadToS3 } from "./s3";
+import { Dialogue, Podcast, Source } from "./types";
 import { PODCASTS_BUCKET, SOURCES_BUCKET, SYSTEM_PROMPT } from "./utils";
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const DEMO_S3_FILE = ""; // Set to empty when not testing 90b808ab-059d-457b-9fa6-cfc65457e47a.mp3
@@ -125,20 +132,19 @@ export const processSources = async (
     let playId = playlistId;
 
     if (!playId) {
-      const playlist = await createPlaylist("Untitled Playlist");
+      const playlist = await createPlaylist("Untitled");
       playId = playlist.id;
     }
-
-    // let { id: playlistId } = await createPlaylist("Untitled Playlist");
+    const idPrefix = uuidv4().replaceAll("-", "");
 
     for (let i = 0; i < sources.length; i++) {
       const fileKey = `${playId}_${sources[i].name}`;
       await uploadToS3(sources[i], fileKey, SOURCES_BUCKET, "application/pdf");
-      await createSource(sources[i].name, playId, fileKey);
+      await createSource(sources[i].name, playId, fileKey, idPrefix);
     }
 
     for (let i = 0; i < sources.length; i++) {
-      await getPodcastContext(sources[i], playId);
+      await getPodcastContext(sources[i], playId, idPrefix);
     }
 
     return toFormState("SUCCESS", "Successfully processed sources", {
@@ -150,9 +156,13 @@ export const processSources = async (
   }
 };
 
-const getPodcastContext = async (document: File, notebook: string) => {
+const getPodcastContext = async (
+  document: File,
+  notebook: string,
+  idPrefix: string
+) => {
   try {
-    const result = await loadDocumentIntoPinecone(document, notebook);
+    const result = await loadDocumentIntoPinecone(document, notebook, idPrefix);
 
     let text = "";
     result.forEach((page) => {
@@ -199,5 +209,48 @@ const generateScript = async (
   } catch (error) {
     console.error("Failed to generate script: ", error);
     throw new Error("Failed to generate script");
+  }
+};
+
+export const deleteSourceAction = async (
+  source: Source,
+  formState: FormState
+) => {
+  try {
+    await deleteRecords(source.id_prefix);
+    await deleteFromS3(source.key, SOURCES_BUCKET);
+    await deleteSource(source.id);
+    revalidatePath("/playlists");
+    return toFormState("SUCCESS", "Successfully deleted source");
+  } catch (error) {
+    return fromErrorToFormState(error);
+  }
+};
+
+export const deletePlaylistAction = async (
+  item: Podcast,
+  formState: FormState
+) => {
+  try {
+    console.log("Running");
+    await deletePlaylist(item.id);
+    revalidatePath("/");
+    return toFormState("SUCCESS", "Successfully delete podcast");
+  } catch (error) {
+    return fromErrorToFormState(error);
+  }
+};
+
+export const deletePodcastAction = async (
+  item: Podcast,
+  formState: FormState
+) => {
+  try {
+    await deleteFromS3(item.key, PODCASTS_BUCKET);
+    await deletePodcast(item.id);
+    revalidatePath("/playlists");
+    return toFormState("SUCCESS", "Successfully delete podcast");
+  } catch (error) {
+    return fromErrorToFormState(error);
   }
 };

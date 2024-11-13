@@ -10,7 +10,7 @@ function DocumentViewer({ documentKey }: { documentKey: string }) {
   useEffect(() => {
     const fetchDocumentUrl = async () => {
       const url = await fetchFromS3(documentKey, SOURCES_BUCKET);
-      console.log(documentKey);
+
       setDocumentUrl(url);
       return url;
     };

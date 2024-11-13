@@ -1,7 +1,3 @@
-- Make deleteable
-    - podcast
-    - source
-    - playlist
+- Add error handling for deleting
 - Make pods shareable
 - Gracefully handle switching currently playing podcast
-- Add custom audio player

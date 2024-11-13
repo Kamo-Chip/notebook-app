@@ -10,18 +10,26 @@ async function PlaylistContainer() {
 
   return (
     <div>
-      {!playlists.length && <CreateFirstPlaylistCard />}
-      <div className="flex justify-between items-start mb-16">
-        <h2 className="text-5xl font-medium">Your Playlists 💿</h2>
-        <AddSourceDialog trigger={<Button>Create new</Button>} />
-      </div>
-      <div className="grid grid-cols-4 gap-8">
-        {playlists.map((playlist) => (
-          <Link href={`/playlists?playlistId=${playlist.id}`} key={playlist.id}>
-            <PlaylistCard playlist={playlist} />
-          </Link>
-        ))}
-      </div>
+      {!playlists.length ? (
+        <CreateFirstPlaylistCard />
+      ) : (
+        <>
+          <div className="flex justify-between items-start mb-16">
+            <h2 className="text-5xl font-medium">Your Playlists 💿</h2>
+            <AddSourceDialog trigger={<Button>Create new</Button>} />
+          </div>
+          <div className="grid grid-cols-4 gap-8">
+            {playlists.map((playlist) => (
+              <Link
+                href={`/playlists?playlistId=${playlist.id}`}
+                key={playlist.id}
+              >
+                <PlaylistCard playlist={playlist} />
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

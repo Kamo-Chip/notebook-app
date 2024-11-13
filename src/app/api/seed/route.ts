@@ -37,6 +37,7 @@ async function seedSources() {
             playlist_id UUID NOT NULL REFERENCES playlists(id),
             title TEXT NOT NULL,
             key TEXT NOT NULL,
+            id_prefix TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -47,8 +48,8 @@ export async function GET() {
   try {
     await client.sql`BEGIN`;
 
-    await seedPlaylists();
-    await seedPodcasts();
+    // await seedPlaylists();
+    // await seedPodcasts();
     await seedSources();
 
     await client.sql`COMMIT`;

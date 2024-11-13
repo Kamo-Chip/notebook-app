@@ -1,28 +1,22 @@
 "use client";
 
+import { FormState } from "@/lib/form-utils";
 import { Playlist, Podcast } from "@/lib/types";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
 import { format } from "date-fns";
 import { useState } from "react";
+import DeletePodcastPopover from "./delete-podcast-popover";
 import EditCardHeaderForm from "./forms/edit-card-header-form";
 import { CardHeader, CardTitle } from "./ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import TooltipWrapper from "./wrappers/tooltip-wrapper";
-import { FormState } from "@/lib/form-utils";
 
 function EditableCardHeader({
   item,
   itemType,
   formAction,
+  deleteAction,
 }: {
   item: Playlist | Podcast;
   itemType: string;
+  deleteAction: (item: any, formState: FormState) => Promise<FormState>;
   formAction: (
     id: string,
     formState: FormState,
@@ -30,17 +24,23 @@ function EditableCardHeader({
   ) => Promise<FormState>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <CardHeader
       className="flex flex-row justify-between items-start mb-8"
       onClick={(e) => {
-        if (isEditing) e.preventDefault();
+        if (isEditing || open) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       }}
     >
-      <div>
+      <div className="flex-1 max-w-[90%]">
         {/* TODO: Add auto focus */}
-        {!isEditing && <CardTitle className="text-4xl truncate max-w-[280px]">{item.title}</CardTitle>}
+        {!isEditing && (
+          <CardTitle className="text-3xl truncate">{item.title}</CardTitle>
+        )}
         <EditCardHeaderForm
           item={item}
           setIsEditing={setIsEditing}
@@ -53,33 +53,13 @@ function EditableCardHeader({
           {format(new Date(item.created_at).toString(), "dd MMM yyyy")}
         </p>
       </div>
-      <DropdownMenu>
-        <TooltipWrapper
-          trigger={
-            <DropdownMenuTrigger disabled={isEditing}>
-              <span
-                className={clsx("cursor-pointer", {
-                  "text-gray-600/50": isEditing,
-                })}
-              >
-                <EllipsisHorizontalIcon className="w-8 h-8" />
-              </span>
-            </DropdownMenuTrigger>
-          }
-          content={isEditing ? "Save or cancel changes" : ""}
-        />
 
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            onClick={() => {
-              setIsEditing(true);
-            }}
-          >
-            Edit title
-          </DropdownMenuItem>
-          <DropdownMenuItem>Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <DeletePodcastPopover
+        item={item}
+        setIsEditing={setIsEditing}
+        isEditing={isEditing}
+        deleteAction={deleteAction}
+      />
     </CardHeader>
   );
 }

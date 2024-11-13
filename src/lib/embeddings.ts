@@ -23,13 +23,16 @@ export async function getEmbeddings(text: string) {
   }
 }
 
-export async function embedDocument(doc: Document, notebook: string) {
+export async function embedDocument(
+  doc: Document,
+  notebook: string,
+  idPrefix: string
+) {
   try {
     const embeddings = await getEmbeddings(doc.pageContent);
-    const hash = md5(doc.pageContent);
 
     return {
-      id: hash,
+      id: `${idPrefix}#${md5(doc.pageContent)}`,
       values: embeddings,
       metadata: {
         text: doc.metadata.text,

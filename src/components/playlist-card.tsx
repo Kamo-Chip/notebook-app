@@ -1,14 +1,10 @@
-import { editPlaylistTitle } from "@/lib/actions";
+import { deletePlaylistAction, editPlaylistTitle } from "@/lib/actions";
 import { fetchPodcastCount, fetchSourceCount } from "@/lib/data";
 import { Playlist } from "@/lib/types";
 import { pluraliseItem } from "@/lib/utils";
 import EditableCardHeader from "./editable-card-header";
 import { Badge } from "./ui/badge";
-import {
-  Card,
-  CardContent,
-  CardFooter
-} from "./ui/card";
+import { Card, CardContent, CardFooter } from "./ui/card";
 
 async function PlaylistCard({ playlist }: { playlist: Playlist }) {
   const { count: numSources } = await fetchSourceCount(playlist.id);
@@ -21,6 +17,7 @@ async function PlaylistCard({ playlist }: { playlist: Playlist }) {
           item={playlist}
           itemType="playlists"
           formAction={editPlaylistTitle}
+          deleteAction={deletePlaylistAction}
         />
         <div className="mt-4">
           <Badge>

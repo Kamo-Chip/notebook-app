@@ -29,11 +29,11 @@ function CreatePodcastForm({
     <form action={action} className="flex flex-col gap-6">
       <div>
         <label htmlFor="title">Title</label>
-        <Input type="text" name="title" />
+        <Input type="text" name="title" required />
       </div>
       <div>
         <label htmlFor="instructions">Instructions</label>
-        <Textarea name="instructions" />
+        <Textarea name="instructions" required/>
       </div>
       <Button type="submit" disabled={pending} className="mx-auto">
         {pending ? "Creating..." : "Create"}

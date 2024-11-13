@@ -15,6 +15,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { deleteSourceAction } from "@/lib/actions";
+import DeleteSourceForm from "./forms/delete-source-form";
 
 function SidebarSource({ source }: { source: Source }) {
   return (
@@ -33,7 +35,7 @@ function SidebarSource({ source }: { source: Source }) {
               <EllipsisHorizontalIcon className="w-6 h-6 " />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DeleteSourceForm source={source} />
             </DropdownMenuContent>
           </DropdownMenu>
         </DialogTrigger>

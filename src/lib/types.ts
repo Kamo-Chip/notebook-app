@@ -8,6 +8,7 @@ export type Source = {
   playlist_id: string;
   title: string;
   key: string;
+  id_prefix: string;
   created_at: string;
   updated_at: string;
 };

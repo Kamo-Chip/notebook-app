@@ -9,7 +9,7 @@ async function PodcastContainer({ playlistId }: { playlistId: string }) {
   return (
     <div
       className={clsx(
-        { "grid grid-cols-4 gap-8": podcasts.length > 0 },
+        { "grid grid-cols-3  xl:grid-cols-5 gap-8": podcasts.length > 0 },
         { "flex h-full": podcasts.length === 0 }
       )}
     >

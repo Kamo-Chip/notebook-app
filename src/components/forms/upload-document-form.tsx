@@ -29,7 +29,6 @@ function UploadDocumentForm({
     if (state.url) {
       setAudioUrl(state.url);
       setOpen(false);
-      console.log(state.url);
     }
   }, [state]);
 

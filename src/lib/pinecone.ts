@@ -4,8 +4,8 @@ import {
 } from "@pinecone-database/doc-splitter";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
-import { convertToAscii } from "./utils";
 import { embedDocument } from "./embeddings";
+import { convertToAscii } from "./utils";
 
 export const getPineconeClient = () => {
   return new Pinecone({ apiKey: process.env.PINECONE_API_KEY as string });
@@ -46,7 +46,8 @@ const chunks = (array: any[], batchSize = 100) => {
 
 export const loadDocumentIntoPinecone = async (
   file: Blob,
-  notebook: string
+  notebook: string,
+  idPrefix: string
 ) => {
   try {
     console.log("Loading file into pinecone");
@@ -55,6 +56,7 @@ export const loadDocumentIntoPinecone = async (
         "Could not load file: [File name and/notebook was not provided]"
       );
     }
+
     // Obtain the pdf
     // const loader = new PDFLoader(`./documents/${fileName}.pdf`);
     const loader = new PDFLoader(file);
@@ -65,7 +67,7 @@ export const loadDocumentIntoPinecone = async (
 
     // Vectorise and embed individual documents
     const vectors = await Promise.all(
-      documents.flat().map((doc) => embedDocument(doc, notebook))
+      documents.flat().map((doc) => embedDocument(doc, notebook, idPrefix))
     );
 
     // Upload to pinecone
@@ -90,5 +92,39 @@ export const loadDocumentIntoPinecone = async (
   } catch (error: any) {
     console.log("Could not load file into pinecone: ", error.message);
     throw new Error("Could not load file into pinecone: ", error.message);
+  }
+};
+
+export const deleteRecords = async (idPrefix: string) => {
+  try {
+    console.log("Fetching records");
+    const client = getPineconeClient();
+    const pineconeIndex = client.index("notebook");
+    const namespace = pineconeIndex.namespace("notebooks");
+
+    console.log(`${idPrefix}#`);
+    let pageList = await namespace.listPaginated({ prefix: `${idPrefix}#` });
+
+    if (!pageList.vectors) return;
+
+    let vectorIds = pageList.vectors.map((vector) => vector.id);
+
+    vectorIds.push(...pageList.vectors.map((vector) => vector.id));
+
+    while (pageList.pagination?.next) {
+      pageList = await namespace.listPaginated({
+        prefix: "doc1#",
+        paginationToken: pageList.pagination.next,
+      });
+      if (pageList.vectors) {
+        vectorIds.push(...pageList.vectors.map((vector) => vector.id));
+      }
+    }
+
+    await namespace.deleteMany(vectorIds);
+    console.log("Successfully deleted records");
+  } catch (error) {
+    console.error("Failed to delete Pinecone records: ", error);
+    throw new Error("Failed to delete Pinecone records");
   }
 };

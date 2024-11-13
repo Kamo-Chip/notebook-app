@@ -45,3 +45,16 @@ export const fetchFromS3 = async (key: string, bucket: string) => {
     throw new Error("Failed to fetch from s3");
   }
 };
+
+export const deleteFromS3 = async (key: string, bucket: string) => {
+  try {
+    await fetch(`${BASE_URL}/api/s3`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key, bucket: bucket }),
+    });
+  } catch (error) {
+    console.error("Failed to delete from s3: ", error);
+    throw new Error("Failed to delete from s3");
+  }
+};

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
   const command = new GetObjectCommand(input);
 
   const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-  return NextResponse.json({ url });
+  return NextResponse.json({ url }, { status: 200 });
 }
 
 export async function POST(req: Request) {
@@ -47,5 +48,31 @@ export async function POST(req: Request) {
   const command = new PutObjectCommand(input);
 
   const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-  return NextResponse.json({ url });
+  return NextResponse.json({ url }, { status: 200 });
+}
+
+export async function DELETE(req: Request) {
+  const { key, bucket } = await req.json();
+
+  if (!key || !bucket) {
+    return NextResponse.json({ error: "Key is required" }, { status: 400 });
+  }
+
+  const input = { Bucket: bucket, Key: key };
+
+  const command = new DeleteObjectCommand(input);
+
+  try {
+    await s3.send(command);
+    return NextResponse.json(
+      { message: "Successfully deleted object" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting object: ", error);
+    return NextResponse.json(
+      { error: "Failed to delete object" },
+      { status: 500 }
+    );
+  }
 }

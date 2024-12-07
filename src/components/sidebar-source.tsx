@@ -1,41 +1,48 @@
 "use client";
 
 import { Source } from "@/lib/types";
-import {
-  DocumentIcon,
-  EllipsisHorizontalIcon,
-} from "@heroicons/react/24/outline";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
-import DocumentViewer from "./document-viewer";
-import { useState } from "react";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import DocumentViewer from "./document-viewer";
+import DeleteSourceForm from "./forms/delete-source-form";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import useFormStatusToast from "@/hooks/useFormStatusToast";
 import { deleteSourceAction } from "@/lib/actions";
-import DeleteSourceForm from "./forms/delete-source-form";
+import { EMPTY_FORM_STATE } from "@/lib/form-utils";
+import { useActionState } from "react";
 
 function SidebarSource({ source }: { source: Source }) {
+  const [state, action, pending] = useActionState(
+    deleteSourceAction.bind(null, source),
+    EMPTY_FORM_STATE
+  );
+
+  useFormStatusToast(state);
+
   return (
     <div
       key={source.id}
-      className="flex hover:bg-border p-2 rounded-3xl w-[226px]"
+      className={clsx("flex hover:bg-border p-2 rounded-3xl w-[226px]", {
+        "animate-pulse": pending,
+      })}
     >
       <Dialog>
         <DialogTrigger className="flex justify-between w-full">
-          <span className="flex">
-            <span className={clsx("truncate max-w-40")}>{source.title}</span>
+          <span className={clsx("truncate max-w-40 text-sm font-medium")}>
+            {source.title.replaceAll(".pdf", "")}{" "}
           </span>
 
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger disabled={pending}>
               <EllipsisHorizontalIcon className="w-6 h-6 " />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DeleteSourceForm source={source} />
+              <DeleteSourceForm source={source} deleteAction={action} />
             </DropdownMenuContent>
           </DropdownMenu>
         </DialogTrigger>

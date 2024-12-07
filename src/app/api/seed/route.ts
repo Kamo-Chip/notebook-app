@@ -48,8 +48,8 @@ export async function GET() {
   try {
     await client.sql`BEGIN`;
 
-    // await seedPlaylists();
-    // await seedPodcasts();
+    await seedPlaylists();
+    await seedPodcasts();
     await seedSources();
 
     await client.sql`COMMIT`;

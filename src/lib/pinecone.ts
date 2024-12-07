@@ -102,7 +102,7 @@ export const deleteRecords = async (idPrefix: string) => {
     const pineconeIndex = client.index("notebook");
     const namespace = pineconeIndex.namespace("notebooks");
 
-    console.log(`${idPrefix}#`);
+
     let pageList = await namespace.listPaginated({ prefix: `${idPrefix}#` });
 
     if (!pageList.vectors) return;
@@ -113,7 +113,7 @@ export const deleteRecords = async (idPrefix: string) => {
 
     while (pageList.pagination?.next) {
       pageList = await namespace.listPaginated({
-        prefix: "doc1#",
+        prefix: `${idPrefix}#`,
         paginationToken: pageList.pagination.next,
       });
       if (pageList.vectors) {

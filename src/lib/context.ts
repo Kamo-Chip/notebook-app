@@ -42,9 +42,7 @@ export const getContext = async (
       20,
       notebook
     );
-
-    console.log(matches);
-
+    
     const qualifyingDocs = matches.filter(
       (match) => match.score && match.score > 0.7
     );

@@ -28,7 +28,7 @@ export const fromErrorToFormState = (error: unknown, message?: string) => {
   } else if (error instanceof Error) {
     return {
       status: "ERROR" as const,
-      message: error.message,
+      message: message || error.message,
       data: null,
       fieldErrors: {},
       timestamp: Date.now(),

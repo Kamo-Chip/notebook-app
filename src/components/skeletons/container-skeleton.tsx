@@ -1,7 +1,13 @@
 import { Skeleton } from "../ui/skeleton";
 import CardSkeleton from "./card-skeleton";
 
-function ContainerSkeleton({ hasHeading }: { hasHeading?: boolean }) {
+function ContainerSkeleton({
+  hasHeading,
+  grid,
+}: {
+  hasHeading?: boolean;
+  grid: string;
+}) {
   return (
     <div>
       {hasHeading && (
@@ -10,8 +16,8 @@ function ContainerSkeleton({ hasHeading }: { hasHeading?: boolean }) {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-8">
-        {Array.from({ length: 6 }).map(() => (
+      <div className={`${grid} gap-8`}>
+        {Array.from({ length: 8 }).map(() => (
           <CardSkeleton />
         ))}
       </div>

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import EditableCardHeader from "./editable-card-header";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
+import clsx from "clsx";
 
 function PodcastCard({ podcast }: { podcast: Podcast }) {
   const searchParams = useSearchParams();
@@ -73,7 +74,10 @@ function PodcastCard({ podcast }: { podcast: Podcast }) {
         />
         <div className="mt-auto">
           <Badge
-            className="cursor-pointer"
+            className={clsx("cursor-pointer", {
+              "animated-background bg-gradient-to-bl from-lime-500 via-cyan-500 to-purple-500 ":
+                isPlaying,
+            })}
             onClick={() => {
               if (podcast.key !== searchParams.get("podcast")) {
                 setIsLoading(true);
@@ -95,7 +99,9 @@ function PodcastCard({ podcast }: { podcast: Podcast }) {
               <img src="/assets/bars-loading.svg" className="w-6 h-6" />
             )}
 
-            <span className="ml-2">{formatDuration(podcast.length)}</span>
+            <span className="ml-2 font-bold">
+              {formatDuration(podcast.length)}
+            </span>
           </Badge>
         </div>
       </CardContent>

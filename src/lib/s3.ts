@@ -1,7 +1,7 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export const uploadToS3 = async (
-  file: File | Buffer<ArrayBufferLike>,
+  file: File | Buffer,
   key: string,
   bucket: string,
   contentType: "audio/mpeg" | "application/pdf"

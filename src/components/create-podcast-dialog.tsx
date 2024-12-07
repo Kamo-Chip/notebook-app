@@ -1,20 +1,42 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import CreateButton from "./create-button";
 import CreatePodcastForm from "./forms/create-podcast-form";
-import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Dialogue } from "@/lib/types";
+import EditScriptForm from "./forms/edit-script-form";
 
 function CreatePodcastDialog({ playlistId }: { playlistId: string }) {
   const [open, setOpen] = useState(false);
+  const [script, setScript] = useState<Dialogue[]>([]);
+  const [title, setTitle] = useState("");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="p-0 m-0 h-fit">
-        <Button>Create new</Button>
+        <CreateButton />
       </DialogTrigger>
-      <DialogContent>
-        <DialogTitle>Create Podcast</DialogTitle>
-        <CreatePodcastForm playlistId={playlistId} setOpen={setOpen} />
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogTitle>
+          {script.length > 0 ? "Edit script" : "Create Podcast"}
+        </DialogTitle>
+        {!script.length && (
+          <CreatePodcastForm
+            playlistId={playlistId}
+            setScript={setScript}
+            setTitle={setTitle}
+          />
+        )}
+
+        {script.length > 0 && (
+          <EditScriptForm
+            playlistId={playlistId}
+            setOpen={setOpen}
+            script={script}
+            setScript={setScript}
+            title={title}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

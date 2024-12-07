@@ -3,10 +3,10 @@
 import { fetchFromS3 } from "@/lib/s3";
 import { PODCASTS_BUCKET } from "@/lib/utils";
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/solid";
-import clsx from "clsx";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { TbRewindBackward15, TbRewindForward15 } from "react-icons/tb";
+import { MdOutlinePlayDisabled } from "react-icons/md";
 function AudioPlayer() {
   const searchParams = useSearchParams();
   const [audioUrl, setAudioUrl] = useState("");
@@ -121,7 +121,10 @@ function AudioPlayer() {
   return (
     <div className=" absolute bottom-0 left-0 right-0 p-4 h-[69px] border-t flex flex-col">
       {!audioUrl && (
-        <span className="m-auto text-gray-600">No podcast is playing</span>
+        <div className="flex flex-col items-center m-auto text-gray-600/80 font-medium">
+          <MdOutlinePlayDisabled />
+          <span>No podcast selected</span>
+        </div>
       )}
       {audioUrl && (
         <>
@@ -182,13 +185,13 @@ function AudioPlayer() {
               onMouseDown={handleProgressBarClick}
             >
               <div
-                className="bg-primary h-2 relative rounded-3xl"
+                className="bg-primary h-2 relative rounded-3xl animated-background bg-gradient-to-r from-lime-500 to-cyan-500 "
                 style={{
                   width: `${(currentTime / duration) * 100}%`,
                 }}
               >
                 <div
-                  className="w-4 h-4 rounded-full bg-primary absolute right-[-8px] top-0 bottom-0 my-auto"
+                  className="w-4 h-4 rounded-full bg-cyan-500 absolute right-[-8px] top-0 bottom-0 my-auto"
                   onMouseDown={handleCircleMouseDown}
                 ></div>
               </div>

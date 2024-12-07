@@ -3,14 +3,16 @@ import clsx from "clsx";
 import DeletePodcastForm from "./forms/delete-podcast-form";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Playlist, Podcast } from "@/lib/types";
-import { Dispatch, SetStateAction } from "react";
-import { FormState } from "@/lib/form-utils";
+import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
+import { EMPTY_FORM_STATE, FormState } from "@/lib/form-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import TooltipWrapper from "./wrappers/tooltip-wrapper";
+import useFormStatusToast from "@/hooks/useFormStatusToast";
+import { toast } from "sonner";
 
 function DeletePodcastPopover({
   item,
@@ -23,6 +25,12 @@ function DeletePodcastPopover({
   isEditing: boolean;
   deleteAction: (item: any, formState: FormState) => Promise<FormState>;
 }) {
+  const [state, action, pending] = useActionState(
+    deleteAction.bind(null, item),
+    EMPTY_FORM_STATE
+  );
+  useFormStatusToast(state, pending);
+
   return (
     <DropdownMenu>
       <TooltipWrapper
@@ -44,7 +52,7 @@ function DeletePodcastPopover({
         <DeletePodcastForm
           item={item}
           setIsEditing={setIsEditing}
-          deleteAction={deleteAction}
+          deleteAction={action}
         />
       </DropdownMenuContent>
     </DropdownMenu>

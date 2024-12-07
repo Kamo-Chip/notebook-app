@@ -2,7 +2,7 @@ import { FormState } from "@/lib/form-utils";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-function useFormStatusToast(formState: FormState) {
+function useFormStatusToast(formState: FormState, pending?: boolean) {
   useEffect(() => {
     if (formState) {
       if (formState.status === "ERROR") {
@@ -17,7 +17,16 @@ function useFormStatusToast(formState: FormState) {
         });
       }
     }
-  }, [formState]);
+
+    if (pending) {
+      toast.loading("Loading...", {
+        position: "top-right",
+        richColors: true,
+      });
+    } else {
+      toast.dismiss();
+    }
+  }, [formState, pending]);
 }
 
 export default useFormStatusToast;

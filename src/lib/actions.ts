@@ -69,28 +69,52 @@ export const editPodcastTitle = async (
   }
 };
 
-export const createPodcast = async (
+export const createScript = async (
   playlistId: string,
   formState: FormState,
   formData: FormData
 ) => {
-  const audioFiles: string[] = [];
-  const fileNameAndExtension = `${uuidv4()}.mp3`;
-  const finalPodcastPath = path.join(process.cwd(), fileNameAndExtension);
   const fields = Object.fromEntries(formData.entries());
   const instructions = fields.instructions as string;
   const title = fields.title as string;
+  const numSpeakers = fields.numSpeakers as string;
   try {
     // TODO : Add zod validation
-
     const context = await getContext(
       instructions as string,
       "notebooks",
       playlistId
     );
 
-    const script = await generateScript(context, instructions);
+    const script = await generateScript(
+      context,
+      instructions,
+      Number.parseInt(numSpeakers)
+    );
 
+    console.log("SCRIPT\n-----------------------------", script);
+    return toFormState("SUCCESS", "Successfully generated script", {
+      title: title,
+      script: script,
+    });
+  } catch (error) {
+    console.log(error);
+    return fromErrorToFormState(error);
+  }
+};
+
+export const createEpisode = async (
+  playlistId: string,
+  script: Dialogue[],
+  title: string,
+  formState: FormState,
+  formData: FormData
+) => {
+  const audioFiles: string[] = [];
+  const fileNameAndExtension = `${uuidv4()}.mp3`;
+  const finalPodcastPath = path.join(process.cwd(), fileNameAndExtension);
+
+  try {
     await generateAudioFromDialogue(script, audioFiles);
 
     const duration = await combineAudioFiles(audioFiles, finalPodcastPath);
@@ -104,8 +128,13 @@ export const createPodcast = async (
       "audio/mpeg"
     );
 
-    console.log("Duration: ", duration);
-    await createPodcastEpisode(title, playlistId, fileNameAndExtension, 120);
+    console.log("Creating episode");
+    await createPodcastEpisode(
+      title,
+      playlistId,
+      fileNameAndExtension,
+      Math.round(duration)
+    );
 
     const audioUrl = await fetchFromS3(
       DEMO_S3_FILE || fileNameAndExtension,
@@ -119,6 +148,7 @@ export const createPodcast = async (
       url: audioUrl,
     });
   } catch (error) {
+    console.log(error);
     return fromErrorToFormState(error);
   }
 };
@@ -179,7 +209,8 @@ const getPodcastContext = async (
 
 const generateScript = async (
   inputText: string,
-  instructions: string
+  instructions: string,
+  numSpeakers: number
 ): Promise<Dialogue[]> => {
   try {
     const response = await fetch(OPENAI_API_URL, {
@@ -197,7 +228,7 @@ const generateScript = async (
           },
           {
             role: "user",
-            content: `<input_text>${inputText}</input_text>\n<user_instructions>${instructions}</user_instructions>`,
+            content: `<input_text>${inputText}</input_text>\n<user_instructions>${instructions}</user_instructions>\n<num_speakers>${numSpeakers}</num_speakers>`,
           },
         ],
       }),
@@ -235,9 +266,10 @@ export const deletePlaylistAction = async (
     console.log("Running");
     await deletePlaylist(item.id);
     revalidatePath("/");
-    return toFormState("SUCCESS", "Successfully delete podcast");
+    return toFormState("SUCCESS", "Successfully deleted playlist");
   } catch (error) {
-    return fromErrorToFormState(error);
+    console.log(error);
+    return fromErrorToFormState(error, "Failed to delete playlist");
   }
 };
 

@@ -35,9 +35,9 @@ export const DropZone = ({
     <form className="flex flex-col gap-6" action={action}>
       {sources.length > 0 ? (
         <div className="flex flex-wrap gap-4">
-          {sources.map((file) => (
+          {sources.map((file, idx) => (
             <div
-              key={file.name}
+              key={`${file.name}${idx}`}
               className="bg-border rounded-3xl p-2 flex items-center gap-2 max-w-60 justify-between"
             >
               <span className="truncate text-sm text-gray-700">

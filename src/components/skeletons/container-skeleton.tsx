@@ -17,8 +17,8 @@ function ContainerSkeleton({
       )}
 
       <div className={`${grid} gap-8`}>
-        {Array.from({ length: 8 }).map(() => (
-          <CardSkeleton />
+        {Array.from({ length: 8 }).map((_,idx) => (
+          <CardSkeleton key={`${idx}`}/>
         ))}
       </div>
     </div>

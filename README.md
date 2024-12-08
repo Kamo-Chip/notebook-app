@@ -1,3 +1,44 @@
 # NootBookLM
 
-## Need to fix a few errors to be able to push to prod. 
+## Stack 🥞
+- NextJS
+- NeonDB 
+- Vercel Postgres
+- OpenAI
+- Pinecone vector storage
+- ElevenLabs
+- S3
+
+
+## .env file 
+#OPENAI
+OPENAI_API_KEY=
+
+#PINECONE
+PINECONE_API_KEY=
+
+#ELEVENLABS
+ELEVENLABS_API_KEY=
+
+#AWS
+IAM_USER_SECRET=
+IAM_USER_KEY=
+
+#NEONDB
+DATABASE_URL=
+DATABASE_URL_UNPOOLED=
+PGHOST=
+PGHOST_UNPOOLED=
+PGUSER=
+PGDATABASE=
+PGPASSWORD=
+
+#Parameters for Vercel Postgres Templates
+POSTGRES_URL=
+POSTGRES_URL_NON_POOLING=
+POSTGRES_USER=
+POSTGRES_HOST=
+POSTGRES_PASSWORD=
+POSTGRES_DATABASE=
+POSTGRES_URL_NO_SSL=
+POSTGRES_PRISMA_URL=

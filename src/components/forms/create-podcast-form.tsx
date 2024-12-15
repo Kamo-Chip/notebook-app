@@ -59,9 +59,20 @@ function CreateScriptForm({
           defaultValue={2}
         />
       </div>
-      <Button type="submit" disabled={pending} className="mx-auto">
-        {pending ? "Generating script..." : "Create"}
-      </Button>
+      <div className="grid grid-cols-1">
+        <Button type="submit" disabled={pending} className="">
+          {pending ? "Generating script..." : "Generate script"}
+        </Button>
+        <span className="mx-auto my-4">or</span>
+        <Button
+          onClick={(e) => {
+            e.preventDefault();
+            setScript([{ speaker: "Samantha", text: "" }]);
+          }}
+        >
+          Use custom script
+        </Button>
+      </div>
     </form>
   );
 }

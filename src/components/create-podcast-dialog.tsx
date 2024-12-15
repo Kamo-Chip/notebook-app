@@ -1,16 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Dialogue } from "@/lib/types";
+import { useState } from "react";
 import CreateButton from "./create-button";
 import CreatePodcastForm from "./forms/create-podcast-form";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Dialogue } from "@/lib/types";
 import EditScriptForm from "./forms/edit-script-form";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 function CreatePodcastDialog({ playlistId }: { playlistId: string }) {
   const [open, setOpen] = useState(false);
   const [script, setScript] = useState<Dialogue[]>([]);
   const [title, setTitle] = useState("");
-
+  const [linkToPodcast, setLinkToPodcast] = useState("");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="p-0 m-0 h-fit">
@@ -28,14 +28,22 @@ function CreatePodcastDialog({ playlistId }: { playlistId: string }) {
           />
         )}
 
-        {script.length > 0 && (
+        {script.length > 0 && !linkToPodcast && (
           <EditScriptForm
             playlistId={playlistId}
             setOpen={setOpen}
             script={script}
             setScript={setScript}
             title={title}
+            setLinkToPodcast={setLinkToPodcast}
           />
+        )}
+
+        {linkToPodcast && (
+          <div>
+            <audio src={linkToPodcast} />
+            <a href={linkToPodcast} target="_blank">Link to podcast</a>
+          </div>
         )}
       </DialogContent>
     </Dialog>

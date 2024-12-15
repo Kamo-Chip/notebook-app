@@ -11,6 +11,8 @@ export const convertToAscii = (inputStr: string) => {
   return asciiPrintableString;
 };
 
+export const defaultPlaylistId = "15cd95e5-820c-4393-9053-2e7f3521cff3";
+
 export const copyTextToClipboard = async (text: string) => {
   try {
     if ("clipboard" in navigator) {
